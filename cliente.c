@@ -13,7 +13,7 @@
  * Autor: Juan Carlos Cuevas Martínez
  *
  ******************************************************
- * Alumno 1:
+ * Alumno 1:Pablo Martínez Bruque
  * Alumno 2:
  *
  ******************************************************/
@@ -112,55 +112,74 @@ int main(int* argc, char* argv[])
 				address_size = sizeof(server_in6);
 			}
 
+			//BIENVENIDA->HELO(QUIT)->MAIL(QUIT)->RCPT(QUIT)->DATA(QUIT)->MENSAJE->FIN
+
 			//Cada nueva conexión establece el estado incial en
-			estado = S_INIT;
+			estado = S_WELCOME;
 
 			if (connect(sockfd, server_in, address_size) == 0) {
 				printf("CLIENTE> CONEXION ESTABLECIDA CON %s:%d\r\n", ipdest, TCP_SERVICE_PORT);
-
+				//PMB HELO, MAIL, RCPT, DATA, QUIT y RSET.
 				//Inicio de la máquina de estados
 				do {
+					//!!!!!!!!!!!!!!PMB REVISAR TEORIA Y RFC PARA  ENVIO MENSAJES CORRECTOS EN ABNF !!!!!!!!
 					switch (estado) {
-					case S_INIT:
-						// Se recibe el mensaje de bienvenida
-						break;
-					case S_USER:
-						// establece la conexion de aplicacion 
-						printf("CLIENTE> Introduzca el usuario (enter para salir): ");
-						gets_s(input, sizeof(input));
-						if (strlen(input) == 0) {
-							sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", SD, CRLF);
-							estado = S_QUIT;
-						}
-						else {
-							sprintf_s(buffer_out, sizeof(buffer_out), "%s %s%s", SC, input, CRLF);
-						}
-						break;
-					case S_PASS:
-						printf("CLIENTE> Introduzca la clave (enter para salir): ");
-						gets_s(input, sizeof(input));
-						if (strlen(input) == 0) {
-							sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", SD, CRLF);
-							estado = S_QUIT;
-						}
-						else
-							sprintf_s(buffer_out, sizeof(buffer_out), "%s %s%s", PW, input, CRLF);
-						break;
-					case S_DATA:
-						printf("CLIENTE> Introduzca datos (enter o QUIT para salir): ");
-						gets_s(input, sizeof(input));
-						if (strlen(input) == 0) {
-							sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", SD, CRLF);
-							estado = S_QUIT;
-						}
-						else {
-							sprintf_s(buffer_out, sizeof(buffer_out), "%s %s%s", ECHO, input, CRLF);
-						}
-						break;
+						case S_WELCOME:
+							// Se recibe el mensaje de bienvenida
+							break;
+						case S_HELO:
+							// establece la conexion de aplicacion 
+							printf("CLIENT> Enter the domain (press enter to exit): ");
+							gets_s(input, sizeof(input));
+							if (strlen(input) == 0) {
+								sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", SD, CRLF);
+								estado = S_QUIT;
+							}
+							else {
+								sprintf_s(buffer_out, sizeof(buffer_out), "%s %s%s", HELO, input, CRLF);
+							}
+							break;
+						case S_MAIL:
+							printf("CLIENT> Enter the sender (enter para salir): ");
+							gets_s(input, sizeof(input));
+							if (strlen(input) == 0) {
+								sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", SD, CRLF);
+								estado = S_QUIT;
+							}
+							else
+								sprintf_s(buffer_out, sizeof(buffer_out), "%s %s%s", MAIL, input, CRLF);
+							break;
+						case S_RCPT:
+							printf("CLIENTE> Enter the recipient (enter o QUIT para salir): ");
+							gets_s(input, sizeof(input));
+							if (strlen(input) == 0) {
+								sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", SD, CRLF);
+								estado = S_QUIT;
+							}
+							else {
+								sprintf_s(buffer_out, sizeof(buffer_out), "%s %s%s", RCPT, input, CRLF);
+							}
+							break;
 
+					
+						case S_DATA:
+							sprintf_s(buffer_out, sizeof(buffer_out), "%s %s%s", DATA, input, CRLF);
+							break;
+
+						case S_QUIT:
+							sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", SD, CRLF);
+							break;
+
+						case S_RESET:
+							sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", RESET, CRLF);
+							break;
+
+						case S_MESSAGE:
+							sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", MESSAGE, CRLF);
+							break;
 					}
 
-					if (estado != S_INIT) {
+					if (estado != S_WELCOME) {
 						enviados = send(sockfd, buffer_out, (int)strlen(buffer_out), 0);
 						if (enviados == SOCKET_ERROR) {
 							estado = S_QUIT;
@@ -188,9 +207,9 @@ int main(int* argc, char* argv[])
 							estado++;
 						}
 						//Si la autenticación no es correcta se vuelve al estado S_USER
-						if (estado == S_PASS && strncmp(buffer_in, OK, 2) != 0) {
+						/*if (estado == S_PASS && strncmp(buffer_in, OK, 2) != 0) {
 							estado = S_USER;
-						}
+						}*/
 					}
 
 				} while (estado != S_QUIT);

@@ -22,9 +22,15 @@
 #endif
 
 // COMANDOS DE APLICACION
+#define HELO "HELO"
+#define MAIL "MAIL"
+#define RCPT "RCPT"
+#define DATA "DATA"
 #define SC "USER"
 #define PW "PASS"
 #define SD  "QUIT"
+#define RESET "RESET"
+#define MESSAGE "MESSGAE"
 #define ECHO "ECHO"
 
 
@@ -35,12 +41,16 @@
 //FIN DE RESPUESTA
 #define CRLF "\r\n"
 
+//PMB HELO, MAIL, RCPT, DATA, QUIT y RSET.
 //ESTADOS
-#define S_INIT 0
-#define S_USER 1
-#define S_PASS 2
-#define S_DATA 3
-#define S_QUIT 4
+#define S_WELCOME 0
+#define S_HELO 1
+#define S_MAIL 2
+#define S_RCPT 3
+#define S_DATA 4
+#define S_QUIT 5
+#define S_RESET 6
+#define S_MESSAGE 7
 
 
 //PUERTO DEL SERVICIO

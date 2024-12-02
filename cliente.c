@@ -35,7 +35,7 @@ int main(int* argc, char* argv[])
 	int address_size = sizeof(server_in4);
 	char buffer_in[1024], buffer_out[1024], input[1024];
 	int recibidos = 0, enviados = 0;
-	int estado;
+	int state;
 	char option;
 	int ipversion = AF_INET;//IPv4 por defecto
 	char ipdest[256];
@@ -115,7 +115,7 @@ int main(int* argc, char* argv[])
 			//BIENVENIDA->HELO(QUIT)->MAIL(QUIT)->RCPT(QUIT)->DATA(QUIT)->MENSAJE->FIN
 
 			//Cada nueva conexión establece el estado incial en
-			estado = S_WELCOME;
+			state = S_WELCOME;
 
 			if (connect(sockfd, server_in, address_size) == 0) {
 				printf("CLIENTE> CONEXION ESTABLECIDA CON %s:%d\r\n", ipdest, TCP_SERVICE_PORT);
@@ -123,7 +123,7 @@ int main(int* argc, char* argv[])
 				//Inicio de la máquina de estados
 				do {
 					//!!!!!!!!!!!!!!PMB REVISAR TEORIA Y RFC PARA  ENVIO MENSAJES CORRECTOS EN ABNF !!!!!!!!
-					switch (estado) {
+					switch (state) {
 						case S_WELCOME:
 							// Se recibe el mensaje de bienvenida
 							break;
@@ -133,7 +133,7 @@ int main(int* argc, char* argv[])
 							gets_s(input, sizeof(input));
 							if (strlen(input) == 0) {
 								sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", SD, CRLF);
-								estado = S_QUIT;
+								state = S_QUIT;
 							}
 							else {
 								sprintf_s(buffer_out, sizeof(buffer_out), "%s %s%s", HELO, input, CRLF);
@@ -144,7 +144,7 @@ int main(int* argc, char* argv[])
 							gets_s(input, sizeof(input));
 							if (strlen(input) == 0) {
 								sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", SD, CRLF);
-								estado = S_QUIT;
+								state = S_QUIT;
 							}
 							else
 								sprintf_s(buffer_out, sizeof(buffer_out), "%s %s%s", MAIL, input, CRLF);
@@ -154,7 +154,7 @@ int main(int* argc, char* argv[])
 							gets_s(input, sizeof(input));
 							if (strlen(input) == 0) {
 								sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", SD, CRLF);
-								estado = S_QUIT;
+								state = S_QUIT;
 							}
 							else {
 								sprintf_s(buffer_out, sizeof(buffer_out), "%s %s%s", RCPT, input, CRLF);
@@ -175,7 +175,13 @@ int main(int* argc, char* argv[])
 							break;
 
 						case S_MESSAGE:
-							sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", MESSAGE, CRLF);
+							if (strstr(input, "\r\n")) {  // Si se envia un CRLF se pasa a S_DATA
+								state = S_DATA;
+							}
+							else {
+
+								sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", MESSAGE, CRLF);
+							}
 							break;
 					}
 

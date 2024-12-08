@@ -32,6 +32,7 @@
 #define RESET "RESET"
 #define MESSAGE "MESSGAE"
 #define ECHO "ECHO"
+#define SUBJECT "subject:"
 
 
 // RESPUESTAS A COMANDOS DE APLICACION

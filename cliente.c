@@ -33,9 +33,9 @@ int main(int* argc, char* argv[])
 	struct sockaddr_in server_in4;
 	struct sockaddr_in6 server_in6;
 	int address_size = sizeof(server_in4);
-	char buffer_in[1024], buffer_out[1024], input[1024];
+	char buffer_in[1024], buffer_out[1024], input[1024], sender[1024], recipient[1024], subject[1024];
 	int recibidos = 0, enviados = 0;
-	int state;
+	int state, auth=0;
 	char option;
 	int ipversion = AF_INET;//IPv4 por defecto
 	char ipdest[256];
@@ -163,7 +163,24 @@ int main(int* argc, char* argv[])
 
 					
 						case S_DATA:
-							sprintf_s(buffer_out, sizeof(buffer_out), "%s %s%s", DATA, input, CRLF);
+							sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", DATA, CRLF);
+							if (auth == 1) {
+								printf("Enter the subject: ");
+								gets_s(subject, sizeof(subject));
+								if (strlen(input) == 0) {
+									state = S_QUIT;
+								}
+								else {
+									sprintf_s(buffer_out, sizeof(buffer_out), "%s%s%s", SUBJECT, subject, CRLF);
+									printf("Enter the body , use dot (.) to end the email");
+									gets_s(input, sizeof(input));
+									sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", input, CRLF);
+								}
+							
+							}
+							
+							
+							
 							break;
 
 						case S_QUIT:
@@ -275,6 +292,11 @@ int main(int* argc, char* argv[])
 								state = S_QUIT;
 							}
 
+						}
+						else if (state == S_DATA) {
+							if (strcmp(code, "354") == 0) {//cODIGO OK QUE DEVUELVE EL ARGOSOFT
+								auth=1;
+							}
 						}
 						
 						

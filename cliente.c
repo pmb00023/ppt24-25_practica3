@@ -214,10 +214,71 @@ int main(int* argc, char* argv[])
 						strncpy_s(code, sizeof(code), buffer_in, 3);//PMB SE ALMACENAN LOS 3 PRIMEROS VALORES DE LA RESPUESTA, SIENDO EN ESTE CASO LOS CODIGOS DE SMTP (220,250....)
 						code[3] = 0;
 						if (state == S_WELCOME) {
-							if (strcmp(code, "220") == 0) {//cODIGO OK QUE DEVUELVE EL ARGOSOFT
+							if (strcmp(code, "220") == 0) {//CODIGO OK QUE DEVUELVE EL ARGOSOFT
 								state = S_HELO;
 							}
+							else {
+								printf("Respuesta no reconocida: %s\n", code);//PMB Si la respuesta es distinta será un comando no reconocido
+								state = S_QUIT;
+							}
 						}
+						else if (state == S_HELO) {
+							if (strcmp(code, "250") == 0) {//cODIGO OK QUE DEVUELVE EL ARGOSOFT
+								state = S_MAIL;
+							}
+							else if (code[0] == "4") { //PMB Si el sevidor SMTP devuelve un 4XX normalmente un 421 signficia que el servicio no esta disponible temporalmente
+								printf("Error transitorio: %s\n", code);
+								state = S_QUIT;
+							}
+							else if (code[0] == "5") {// PMB si el sevidor SMTP devuelve un 5XX puede ser un error de sintaxis o un error en los parametros de los comandos
+								printf("Error permanente: %s\n", code);
+								state = S_QUIT;
+							}
+							else {
+								printf("Respuesta no reconocida: %s\n", code);//PMB Si la respuesta es distinta será un comando no reconocido
+								state = S_QUIT;
+							}
+							
+						}
+						else if (state == S_MAIL) {
+							if (strcmp(code, "250") == 0) {//cODIGO OK QUE DEVUELVE EL ARGOSOFT
+								state = S_RCPT;
+							}
+							else if (code[0] == "4") { //PMB Si el sevidor SMTP devuelve un 4XX normalmente un 421 signficia que el servicio no esta disponible temporalmente
+								printf("Error transitorio: %s\n", code);
+								state = S_QUIT;
+							}
+							else if (code[0] == "5") {// PMB si el sevidor SMTP devuelve un 5XX puede ser un error de sintaxis o un error en los parametros de los comandos
+								printf("Error permanente: %s\n", code);
+								state = S_QUIT;
+							}
+							else {
+								printf("Respuesta no reconocida: %s\n", code);//PMB Si la respuesta es distinta será un comando no reconocido
+								state = S_QUIT;
+							}
+
+						}
+						else if (state == S_RCPT) {
+							if (strcmp(code, "250") == 0) {//cODIGO OK QUE DEVUELVE EL ARGOSOFT
+								state = S_DATA;
+							}
+							else if (code[0] == "4") { //PMB Si el sevidor SMTP devuelve un 4XX normalmente un 421 signficia que el servicio no esta disponible temporalmente
+								printf("Error transitorio: %s\n", code);
+								state = S_QUIT;
+							}
+							else if (code[0] == "5") {// PMB si el sevidor SMTP devuelve un 5XX puede ser un error de sintaxis o un error en los parametros de los comandos
+								printf("Error permanente: %s\n", code);
+								state = S_QUIT;
+							}
+							else {
+								printf("Respuesta no reconocida: %s\n", code);//PMB Si la respuesta es distinta será un comando no reconocido
+								state = S_QUIT;
+							}
+
+						}
+						
+						
+
 						if (state != S_DATA && strncmp(buffer_in, OK, 2) == 0){
 							state++;
 						}

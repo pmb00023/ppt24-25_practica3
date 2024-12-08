@@ -23,8 +23,8 @@
 
 // COMANDOS DE APLICACION
 #define HELO "HELO"
-#define MAIL "MAIL"
-#define RCPT "RCPT"
+#define MAIL "MAIL FROM:"
+#define RCPT "RCPT TO:"
 #define DATA "DATA"
 #define SC "USER"
 #define PW "PASS"

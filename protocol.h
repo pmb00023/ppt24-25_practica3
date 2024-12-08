@@ -54,7 +54,7 @@
 
 
 //PUERTO DEL SERVICIO
-#define TCP_SERVICE_PORT	60000
+#define TCP_SERVICE_PORT	25
 
 // NOMBRE Y CLAVE AUTORIZADOS
 // Nota: esto no se debe hacer nunca, es solamente para simplificar el funcionamiento del

@@ -39,7 +39,7 @@ int main(int* argc, char* argv[])
 	char option;
 	int ipversion = AF_INET;//IPv4 por defecto
 	char ipdest[256];
-	char default_ip4[16] = "127.0.0.1";
+	char default_ip4[16] = "192.168.1.146";
 	char default_ip6[64] = "::1";
 
 	WORD wVersionRequested;
@@ -185,32 +185,41 @@ int main(int* argc, char* argv[])
 							break;
 					}
 
-					if (estado != S_WELCOME) {
+					if (state != S_WELCOME) {
 						enviados = send(sockfd, buffer_out, (int)strlen(buffer_out), 0);
 						if (enviados == SOCKET_ERROR) {
-							estado = S_QUIT;
+							state = S_QUIT;
 							continue;// La sentencia continue hace que la ejecución dentro de un
 									 // bucle salte hasta la comprobación del mismo.
 						}
 					}
 
 					recibidos = recv(sockfd, buffer_in, 512, 0);
+
 					if (recibidos <= 0) {
 						DWORD error = GetLastError();
 						if (recibidos < 0) {
 							printf("CLIENTE> Error %d en la recepción de datos\r\n", error);
-							estado = S_QUIT;
+							state = S_QUIT;
 						}
 						else {
 							printf("CLIENTE> Conexión con el servidor cerrada\r\n");
-							estado = S_QUIT;
+							state = S_QUIT;
 						}
 					}
 					else {
 						buffer_in[recibidos] = 0x00;
 						printf(buffer_in);
-						if (estado != S_DATA && strncmp(buffer_in, OK, 2) == 0){
-							estado++;
+						char code[1024];
+						strncpy_s(code, sizeof(code), buffer_in, 3);//PMB SE ALMACENAN LOS 3 PRIMEROS VALORES DE LA RESPUESTA, SIENDO EN ESTE CASO LOS CODIGOS DE SMTP (220,250....)
+						code[3] = 0;
+						if (state == S_WELCOME) {
+							if (strcmp(code, "220") == 0) {//cODIGO OK QUE DEVUELVE EL ARGOSOFT
+								state = S_HELO;
+							}
+						}
+						if (state != S_DATA && strncmp(buffer_in, OK, 2) == 0){
+							state++;
 						}
 						//Si la autenticación no es correcta se vuelve al estado S_USER
 						/*if (estado == S_PASS && strncmp(buffer_in, OK, 2) != 0) {
@@ -218,7 +227,7 @@ int main(int* argc, char* argv[])
 						}*/
 					}
 
-				} while (estado != S_QUIT);
+				} while (state != S_QUIT);
 			}
 			else {
 				int error_code = GetLastError();

@@ -148,14 +148,14 @@ int main(int* argc, char* argv[])
 								sprintf_s(buffer_out, sizeof(buffer_out), "%s %s%s", MAIL, input, CRLF); //Mail command to send with the destination
 							break;
 						case S_RCPT://RCPT STATE 
-							int correct_input = 1;
 							do {
+								int correct_input = 1;
 								printf("Client> Indicates the number of recipients you wish to send the mail to : ");//You are asked for the number of recipients to whom you want to send the mail.
 								gets_s(n_recipient, sizeof(n_recipient));
 								for (int i = 0; n_recipient[i] != '\0'; i++) {// Loop through each character in the string until the of the string(the null terminator)
 									if (!isdigit(n_recipient[i])) {
 										correct_input = 0; 
-										break;
+										break;//IF there are any character or something different it exit the for 
 									}
 								}
 
@@ -260,11 +260,11 @@ int main(int* argc, char* argv[])
 					if (recibidos <= 0) {
 						DWORD error = GetLastError();
 						if (recibidos < 0) {
-							printf("CLIENTE> Error %d en la recepción de datos\r\n", error);
+							printf("CLIENTE> Error %d in receiving data\r\n", error);
 							state = S_QUIT;
 						}
 						else {
-							printf("CLIENTE> Conexión con el servidor cerrada\r\n");
+							printf("CLIENT> Connection to server closed\r\n");
 							state = S_QUIT;
 						}
 					}
@@ -379,25 +379,20 @@ int main(int* argc, char* argv[])
 							}
 						}
 
-						if (state != S_DATA && strncmp(buffer_in, OK, 2) == 0){
-							state++;
-						}
-						//Si la autenticación no es correcta se vuelve al estado S_USER
-						/*if (estado == S_PASS && strncmp(buffer_in, OK, 2) != 0) {
-							estado = S_USER;
-						}*/
+						
+						
 					}
 
 				} while (state != S_QUIT);
 			}
 			else {
 				int error_code = GetLastError();
-				printf("CLIENTE> ERROR AL CONECTAR CON %s:%d\r\n", ipdest, TCP_SERVICE_PORT);
+				printf("CLIENTE> ERROR TO CONNECT WITH %s:%d\r\n", ipdest, TCP_SERVICE_PORT);
 			}
 			closesocket(sockfd);
 
 		}
-		printf("-----------------------\r\n\r\nCLIENTE> Volver a conectar (S/N)\r\n");
+		printf("-----------------------\r\n\r\nCLIENT> Reconnect? (Y/N)\r\n");
 		option = _getche();
 
 	} while (option != 'n' && option != 'N');

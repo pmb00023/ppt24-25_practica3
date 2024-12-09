@@ -35,7 +35,7 @@ int main(int* argc, char* argv[])
 	int address_size = sizeof(server_in4);
 	char buffer_in[1024], buffer_out[1024], input[1024], sender[1024], recipient[1024], subject[1024];
 	int recibidos = 0, enviados = 0;
-	int state, auth=0;
+	int state;
 	char option;
 	int ipversion = AF_INET;//IPv4 por defecto
 	char ipdest[256];
@@ -164,23 +164,6 @@ int main(int* argc, char* argv[])
 					
 						case S_DATA:
 							sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", DATA, CRLF);
-							if (auth == 1) {
-								printf("Enter the subject: ");
-								gets_s(subject, sizeof(subject));
-								if (strlen(input) == 0) {
-									state = S_QUIT;
-								}
-								else {
-									sprintf_s(buffer_out, sizeof(buffer_out), "%s%s%s", SUBJECT, subject, CRLF);
-									printf("Enter the body , use dot (.) to end the email");
-									gets_s(input, sizeof(input));
-									sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", input, CRLF);
-								}
-							
-							}
-							
-							
-							
 							break;
 
 						case S_QUIT:
@@ -192,13 +175,31 @@ int main(int* argc, char* argv[])
 							break;
 
 						case S_MESSAGE:
-							if (strstr(input, "\r\n")) {  // Si se envia un CRLF se pasa a S_DATA
-								state = S_DATA;
+							
+							printf("Enter the subject: ");
+							gets_s(subject, sizeof(subject));
+							if (strlen(input) == 0) {
+								state = S_QUIT;
 							}
 							else {
-
-								sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", MESSAGE, CRLF);
+								int p = 0;
+								sprintf_s(buffer_out, sizeof(buffer_out), "%s%s%s", SUBJECT, subject, CRLF);
+								printf("Enter the body or use only a dot (.) to end the email \r\n");
+								do {
+									printf("Enter a new line or use only  a dot (.) to end the email \r\n");
+									gets_s(input, sizeof(input));
+									if (strcmp(input, ".") == 0) {
+										p = 1; // O la acción que quieras realizar para terminar el proceso
+									}
+									else {
+										// Procesar la línea del mensaje
+										printf("You entered: %s\r\n", input);
+									}
+									sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", input, CRLF);
+								} while (p == 0);
+								
 							}
+							
 							break;
 					}
 
@@ -295,7 +296,12 @@ int main(int* argc, char* argv[])
 						}
 						else if (state == S_DATA) {
 							if (strcmp(code, "354") == 0) {//cODIGO OK QUE DEVUELVE EL ARGOSOFT
-								auth=1;
+								state = S_MESSAGE;
+							}
+						}
+						else if (state == S_MESSAGE) {
+							if (strcmp(code, "250") == 0) {//cODIGO OK QUE DEVUELVE EL ARGOSOFT
+								state = S_MAIL;
 							}
 						}
 						

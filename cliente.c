@@ -39,7 +39,7 @@ int main(int* argc, char* argv[])
 	char option;
 	int ipversion = AF_INET;//IPv4 por defecto
 	char ipdest[256];
-	char default_ip4[16] = "192.168.1.146";
+	char default_ip4[16] = "192.168.1.146";//IP ARGOSOFT
 	char default_ip6[64] = "::1";
 
 	WORD wVersionRequested;
@@ -220,7 +220,7 @@ int main(int* argc, char* argv[])
 
 						case S_MESSAGE:
 							
-							printf("CLIENT > Enter the subject: ");
+							printf("CLIENT > Enter the subject: ");//Ask for the subject of the email
 							gets_s(subject, sizeof(subject));
 							if (strlen(subject) == 0) {
 								sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", SD, CRLF);
@@ -240,7 +240,10 @@ int main(int* argc, char* argv[])
 
 										printf("CLIENT > You have exceeded the maximum number of characters allowed per line in SMTP, please enter less than 1000.");
 									}
-									sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", input, CRLF);
+									else{
+										sprintf_s(buffer_out, sizeof(buffer_out), "%s%s", input, CRLF);
+									}
+
 								} while (p == 0);	
 							}
 							break;
@@ -257,7 +260,7 @@ int main(int* argc, char* argv[])
 
 					recibidos = recv(sockfd, buffer_in, 512, 0);
 
-					if (recibidos <= 0) {
+					if (recibidos <= 0) {//close the connection
 						DWORD error = GetLastError();
 						if (recibidos < 0) {
 							printf("CLIENTE> Error %d in receiving data\r\n", error);

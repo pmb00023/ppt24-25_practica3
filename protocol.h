@@ -23,8 +23,8 @@
 
 // COMANDOS DE APLICACION
 #define HELO "HELO"
-#define MAIL "MAIL"
-#define RCPT "RCPT"
+#define MAIL "MAIL FROM:"
+#define RCPT "RCPT TO:"
 #define DATA "DATA"
 #define SC "USER"
 #define PW "PASS"
@@ -32,6 +32,7 @@
 #define RESET "RESET"
 #define MESSAGE "MESSGAE"
 #define ECHO "ECHO"
+#define SUBJECT "subject:"
 
 
 // RESPUESTAS A COMANDOS DE APLICACION
@@ -54,7 +55,7 @@
 
 
 //PUERTO DEL SERVICIO
-#define TCP_SERVICE_PORT	60000
+#define TCP_SERVICE_PORT	25
 
 // NOMBRE Y CLAVE AUTORIZADOS
 // Nota: esto no se debe hacer nunca, es solamente para simplificar el funcionamiento del
